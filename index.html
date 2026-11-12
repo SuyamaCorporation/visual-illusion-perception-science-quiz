@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>視覚錯覚知覚科学クイズ</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white min-h-screen">
+<div class="max-w-2xl mx-auto px-4 py-8">
+  <h1 class="text-2xl font-bold text-center mb-1 text-violet-400">視覚錯覚 知覚科学クイズ</h1>
+  <p class="text-center text-gray-500 mb-8 text-sm">あなたの脳は騙される？15の有名錯覚に挑戦</p>
+  <div id="startScreen" class="text-center">
+    <div class="bg-gray-800 border border-gray-700 rounded-xl p-8 mb-4">
+      <div class="text-6xl mb-4">👁️</div>
+      <p class="text-gray-300 mb-6">世界的に有名な視覚錯覚を使った15問。画像を見て質問に答え、神経科学的解説を学ぼう。</p>
+      <button onclick="startQuiz()" class="bg-violet-600 hover:bg-violet-500 text-white font-bold px-8 py-3 rounded-xl text-lg transition">クイズを始める</button>
+    </div>
+  </div>
+  <div id="quizScreen" class="hidden">
+    <div class="flex justify-between text-sm text-gray-400 mb-3">
+      <span>問題 <span id="qNum">1</span> / 15</span>
+      <span>正解 <span id="correctCount">0</span> 問</span>
+    </div>
+    <div class="bg-gray-800 rounded-full h-1.5 mb-6">
+      <div id="progressBar" class="bg-violet-500 h-1.5 rounded-full transition-all" style="width:0%"></div>
+    </div>
+    <div class="bg-gray-800 border border-gray-700 rounded-xl overflow-hidden mb-4">
+      <div class="p-4 border-b border-gray-700">
+        <div class="text-xs text-violet-400 mb-1" id="illusion-name"></div>
+        <div class="text-sm font-medium" id="q-text"></div>
+      </div>
+      <div class="p-6 flex justify-center bg-gray-900 min-h-48" id="illusion-container"></div>
+      <div class="p-4">
+        <div id="answer-buttons" class="flex flex-wrap gap-2 justify-center"></div>
+      </div>
+    </div>
+    <div id="reveal-panel" class="hidden bg-gray-800 border border-violet-800 rounded-xl p-5">
+      <div class="flex items-center gap-2 mb-3">
+        <span id="verdict-icon" class="text-2xl"></span>
+        <span id="verdict-text" class="font-bold"></span>
+      </div>
+      <div class="text-sm text-gray-300 mb-3" id="reveal-explanation"></div>
+      <div class="text-xs text-violet-400 italic" id="science-note"></div>
+      <button id="nextBtn" onclick="nextIllusion()" class="mt-4 w-full bg-violet-600 hover:bg-violet-500 text-white font-bold py-2 rounded-lg transition">次へ →</button>
+    </div>
+  </div>
+  <div id="resultScreen" class="hidden text-center">
+    <div class="bg-gray-800 border border-gray-700 rounded-xl p-8">
+      <div class="text-5xl mb-4" id="res-emoji"></div>
+      <h2 class="text-xl font-bold text-violet-300 mb-2" id="res-title"></h2>
+      <div class="text-4xl font-bold text-white mb-6" id="res-score"></div>
+      <p class="text-gray-400 text-sm mb-6" id="res-msg"></p>
+      <button onclick="startQuiz()" class="bg-violet-600 hover:bg-violet-500 text-white font-bold px-8 py-3 rounded-xl transition">もう一度</button>
+    </div>
+  </div>
+</div>
+<script>
+function escapeHtml(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+
+const illusions=[
+{name:'ミュラー・リヤー錯視',question:'2本の横線はどちらが長い？',choices:['上の線が長い','下の線が長い','同じ長さ'],correct:2,explain:'実際は2本とも同じ長さです！矢羽根の向きによって距離感が変わり、脳が長さを誤判断します。',science:'大脳視覚野が「矢印内向き＝近くの角→短く見える」「矢印外向き＝遠くの角→長く見える」と解釈するため生じます（Carpentered-World理論）。',
+draw:function(c){var s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('viewBox','0 0 300 120');s.setAttribute('class','w-64');
+s.innerHTML='<line x1="60" y1="40" x2="240" y2="40" stroke="white" stroke-width="3"/><line x1="60" y1="40" x2="80" y2="25" stroke="white" stroke-width="2"/><line x1="60" y1="40" x2="80" y2="55" stroke="white" stroke-width="2"/><line x1="240" y1="40" x2="220" y2="25" stroke="white" stroke-width="2"/><line x1="240" y1="40" x2="220" y2="55" stroke="white" stroke-width="2"/><line x1="60" y1="80" x2="240" y2="80" stroke="white" stroke-width="3"/><line x1="60" y1="80" x2="40" y2="65" stroke="white" stroke-width="2"/><line x1="60" y1="80" x2="40" y2="95" stroke="white" stroke-width="2"/><line x1="240" y1="80" x2="260" y2="65" stroke="white" stroke-width="2"/><line x1="240" y1="80" x2="260" y2="95" stroke="white" stroke-width="2"/><text x="30" y="45" fill="#9ca3af" font-size="12">A</text><text x="30" y="85" fill="#9ca3af" font-size="12">B</text>';
+c.appendChild(s);}},
+{name:'ポンゾ錯視',question:'2本の水平線はどちらが長い？',choices:['上の線が長い','下の線が長い','同じ長さ'],correct:2,explain:'両方同じ長さです！奥に収束する2本の斜線が「遠近感」を作り出し、上の線を長く感じさせます。',science:'線路の消失点のような遠近法的手がかりが大脳皮質の空間判断を歪めます。月の錯視と同じメカニズムです（Ponzo,1911）。',
+draw:function(c){var s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('viewBox','0 0 300 160');s.setAttribute('class','w-64');
+s.innerHTML='<line x1="150" y1="10" x2="50" y2="150" stroke="#6b7280" stroke-width="2"/><line x1="150" y1="10" x2="250" y2="150" stroke="#6b7280" stroke-width="2"/><line x1="110" y1="50" x2="190" y2="50" stroke="white" stroke-width="4"/><line x1="80" y1="120" x2="220" y2="120" stroke="white" stroke-width="4"/><text x="92" y="45" fill="#9ca3af" font-size="11">A</text><text x="92" y="115" fill="#9ca3af" font-size="11">B</text>';
+c.appendChild(s);}},
+{name:'ツェルナー錯視',question:'長い縦線は平行していますか？',choices:['傾いている','完全に平行','交差している'],correct:1,explain:'長い線は実際には完全に平行です！短い斜め線（ハッチング）の向きが傾いて見せます。',science:'初期視覚野（V1）のニューロンが斜め方向に反応し、周囲の線の傾きが判断を歪めます（Zöllner,1860）。',
+draw:function(c){var s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('viewBox','0 0 300 160');s.setAttribute('class','w-72');
+var html='';for(var i=0;i<4;i++){var x=60+i*60;html+='<line x1="'+x+'" y1="10" x2="'+x+'" y2="150" stroke="white" stroke-width="3"/>';for(var y=20;y<150;y+=15){var d=i%2===0?1:-1;html+='<line x1="'+(x-15)+'" y1="'+(y+d*8)+'" x2="'+(x+15)+'" y2="'+(y-d*8)+'" stroke="#8b5cf6" stroke-width="1.5"/>'; }}
+s.innerHTML=html;c.appendChild(s);}},
+{name:'チェッカーシャドウ錯視',question:'マス目のAとBは何色？',choices:['Aは暗い、Bは明るい','Aは明るい、Bは暗い','全く同じグレー'],correct:2,explain:'AもBも全く同じグレーです！影の中にあるBは「明るいはず」と脳が補正するため明るく見えます。',science:'ライトネス・コンスタンシー：脳は周囲の照明条件を考慮して色を判断します（Edward Adelson,1995）。',
+draw:function(c){var cv=document.createElement('canvas');cv.width=200;cv.height=200;cv.className='w-40 h-40';var ctx=cv.getContext('2d');var sz=25;
+for(var r=0;r<8;r++){for(var col=0;col<8;col++){ctx.fillStyle=(r+col)%2===0?'#c8c8c8':'#686868';ctx.fillRect(col*sz,r*sz,sz,sz);}}
+var grad=ctx.createLinearGradient(50,0,150,200);grad.addColorStop(0,'rgba(0,0,0,0)');grad.addColorStop(0.4,'rgba(0,0,0,0.55)');grad.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=grad;ctx.fillRect(50,0,100,200);
+ctx.fillStyle='#686868';ctx.fillRect(0,50,sz,sz);ctx.fillStyle='white';ctx.font='bold 13px sans-serif';ctx.textAlign='center';ctx.fillText('A',sz/2,50+sz/2+5);
+ctx.fillStyle='#686868';ctx.fillRect(100,100,sz,sz);ctx.fillStyle='white';ctx.fillText('B',100+sz/2,100+sz/2+5);
+c.appendChild(cv);}},
+{name:'エビングハウス錯視',question:'黄色の中央の円はどちらが大きい？',choices:['左の円が大きい','右の円が大きい','同じ大きさ'],correct:2,explain:'中央の2つの円は同じ大きさです！大きな円に囲まれた円は小さく、小さな円に囲まれた円は大きく見えます。',science:'相対的サイズ判断：脳は物体の大きさを絶対値でなく周囲との関係で評価します（Titchener,1901）。',
+draw:function(c){var s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('viewBox','0 0 300 160');s.setAttribute('class','w-72');
+var h='<circle cx="80" cy="80" r="22" fill="#f59e0b"/>';for(var i=0;i<6;i++){var a=i*Math.PI/3;h+='<circle cx="'+(80+Math.cos(a)*55)+'" cy="'+(80+Math.sin(a)*55)+'" r="22" fill="none" stroke="#6b7280" stroke-width="2"/>';}
+h+='<circle cx="220" cy="80" r="22" fill="#f59e0b"/>';for(var i=0;i<8;i++){var a=i*Math.PI/4;h+='<circle cx="'+(220+Math.cos(a)*40)+'" cy="'+(80+Math.sin(a)*40)+'" r="8" fill="none" stroke="#6b7280" stroke-width="2"/>';}
+s.innerHTML=h;c.appendChild(s);}},
+{name:'カニッツァの三角形',question:'白い三角形は実際に描かれている？',choices:['三角形が描かれている','三角形は描かれていない','点線の三角形がある'],correct:1,explain:'白い三角形は描かれていません！脳が3つの扇形から輪郭を補完して三角形を「知覚」します。',science:'主観的輪郭：V2野のニューロンが実際に線がないところでも輪郭に反応します（ゲシュタルト・閉合の法則、Kanizsa,1955）。',
+draw:function(c){var s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('viewBox','0 0 300 240');s.setAttribute('class','w-64');
+s.innerHTML='<rect width="300" height="240" fill="#111827"/><circle cx="150" cy="55" r="38" fill="#1f2937"/><polygon points="150,55 188,55 169,22" fill="#111827"/><circle cx="75" cy="185" r="38" fill="#1f2937"/><polygon points="75,185 75,147 42,166" fill="#111827"/><circle cx="225" cy="185" r="38" fill="#1f2937"/><polygon points="225,185 225,147 258,166" fill="#111827"/>';
+c.appendChild(s);}},
+{name:'ネッカーキューブ',question:'この立方体、どちらの面が手前？',choices:['左上の面が手前','右下の面が手前','交互に切り替わる'],correct:2,explain:'正解！ネッカーキューブは「双安定知覚」の例。脳は2種類の解釈を通常3-5秒ごとに切り替えます。',science:'前頭前皮質と視覚野の相互作用で切り替わります。片方の解釈が「飽和」すると神経競合で別の解釈に切り替わります（Necker,1832）。',
+draw:function(c){var s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('viewBox','0 0 240 220');s.setAttribute('class','w-56');
+s.innerHTML='<line x1="80" y1="60" x2="160" y2="60" stroke="white" stroke-width="2"/><line x1="80" y1="60" x2="80" y2="140" stroke="white" stroke-width="2"/><line x1="160" y1="60" x2="160" y2="140" stroke="white" stroke-width="2"/><line x1="80" y1="140" x2="160" y2="140" stroke="white" stroke-width="2"/><line x1="110" y1="30" x2="190" y2="30" stroke="white" stroke-width="2"/><line x1="110" y1="30" x2="110" y2="110" stroke="white" stroke-width="2"/><line x1="190" y1="30" x2="190" y2="110" stroke="white" stroke-width="2"/><line x1="110" y1="110" x2="190" y2="110" stroke="white" stroke-width="2"/><line x1="80" y1="60" x2="110" y2="30" stroke="white" stroke-width="2"/><line x1="160" y1="60" x2="190" y2="30" stroke="white" stroke-width="2"/><line x1="80" y1="140" x2="110" y2="110" stroke="white" stroke-width="2"/><line x1="160" y1="140" x2="190" y2="110" stroke="white" stroke-width="2"/>';
+c.appendChild(s);}},
+{name:'ヘルマン格子',question:'白い交差点に何が見える？',choices:['灰色の点が見える','白いまま何も見えない','黒い点が見える'],correct:0,explain:'交差点に灰色のぼやけた点が見えます！直視すると消えます。これは側方抑制によるものです。',science:'網膜神経節細胞のON中心型受容野が、交差点では4方向から抑制を受けるため相対的に暗く見えます（lateral inhibition、Hermann,1870）。',
+draw:function(c){var cv=document.createElement('canvas');cv.width=210;cv.height=210;cv.className='w-48 h-48';var ctx=cv.getContext('2d');ctx.fillStyle='black';ctx.fillRect(0,0,210,210);var sz=36,gap=10,count=5;for(var r=0;r<count;r++){for(var col=0;col<count;col++){ctx.fillStyle='#4b5563';ctx.fillRect(col*(sz+gap)+gap/2,r*(sz+gap)+gap/2,sz,sz);}}c.appendChild(cv);}},
+{name:'フレーザースパイラル',question:'この図形はスパイラル（螺旋）？',choices:['螺旋になっている','同心円でスパイラルではない','楕円形'],correct:1,explain:'実際は同心円です！スパイラルには見えますが、全ての円は閉じた円を描いています。',science:'斜め成分を持つ周期的パターンが方向選択性ニューロンを誤活性化し、曲率の知覚を歪めます（Fraser,1908）。',
+draw:function(c){var cv=document.createElement('canvas');cv.width=220;cv.height=220;cv.className='w-48 h-48';var ctx=cv.getContext('2d');ctx.fillStyle='#111827';ctx.fillRect(0,0,220,220);ctx.translate(110,110);for(var r=15;r<=95;r+=16){var segs=Math.floor(2*Math.PI*r/8);for(var i=0;i<segs;i++){var a1=(i/segs)*2*Math.PI,a2=((i+0.5)/segs)*2*Math.PI;ctx.beginPath();ctx.arc(0,0,r,a1,a2);ctx.strokeStyle=i%2===0?'white':'#374151';ctx.lineWidth=5;ctx.stroke();}}c.appendChild(cv);}},
+{name:'ルビンの壺',question:'この図に何が見える？',choices:['壺（花瓶）のみ','向かい合った2つの顔のみ','壺か顔、どちらでも見える'],correct:2,explain:'正解！図と地（figure-ground）の関係によって壺にも顔にも見えます。',science:'前頭前皮質と側頭葉の相互作用が「図」として解釈する対象を切り替えます。両方同時には見えない（Rubin,1915）。',
+draw:function(c){var cv=document.createElement('canvas');cv.width=210;cv.height=190;cv.className='w-48';var ctx=cv.getContext('2d');ctx.fillStyle='#1f2937';ctx.fillRect(0,0,210,190);ctx.fillStyle='#f59e0b';ctx.beginPath();ctx.moveTo(105,15);ctx.bezierCurveTo(65,35,45,55,42,85);ctx.bezierCurveTo(38,115,52,135,68,155);ctx.bezierCurveTo(82,172,92,178,105,182);ctx.bezierCurveTo(118,178,128,172,142,155);ctx.bezierCurveTo(158,135,172,115,168,85);ctx.bezierCurveTo(165,55,145,35,105,15);ctx.fill();ctx.fillStyle='#1f2937';ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(105,0);ctx.lineTo(105,15);ctx.bezierCurveTo(65,35,45,55,42,85);ctx.bezierCurveTo(38,115,52,135,68,155);ctx.bezierCurveTo(82,172,92,178,105,182);ctx.lineTo(105,190);ctx.lineTo(0,190);ctx.closePath();ctx.fill();ctx.beginPath();ctx.moveTo(210,0);ctx.lineTo(105,0);ctx.lineTo(105,15);ctx.bezierCurveTo(145,35,165,55,168,85);ctx.bezierCurveTo(172,115,158,135,142,155);ctx.bezierCurveTo(128,172,118,178,105,182);ctx.lineTo(105,190);ctx.lineTo(210,190);ctx.closePath();ctx.fill();c.appendChild(cv);}},
+{name:'ヘリング錯視',question:'2本の縦線は曲がっている？',choices:['波打って曲がっている','完全な直線','ギザギザしている'],correct:1,explain:'2本の縦線は完全な直線です！放射状の背景線が直線を曲がって見せます（Hering,1861）。',science:'方向選択性ニューロン間の相互抑制が、隣接する傾きを持つ線の影響を受け、直線の知覚を歪めます（角度拡大効果）。',
+draw:function(c){var s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('viewBox','0 0 300 240');s.setAttribute('class','w-72');var h='<rect width="300" height="240" fill="#1f2937"/>';for(var a=0;a<360;a+=15){var rad=a*Math.PI/180;h+='<line x1="150" y1="120" x2="'+(150+Math.cos(rad)*180)+'" y2="'+(120+Math.sin(rad)*180)+'" stroke="#374151" stroke-width="1"/>';}h+='<line x1="100" y1="10" x2="100" y2="230" stroke="white" stroke-width="3"/><line x1="200" y1="10" x2="200" y2="230" stroke="white" stroke-width="3"/>';s.innerHTML=h;c.appendChild(s);}},
+{name:'マッハ・バンド効果',question:'グラデーションの境界に細いバンドが見える？',choices:['明るい帯と暗い帯が見える','均一なグラデーションのみ','点滅している'],correct:0,explain:'境界付近に明るいバンドと暗いバンドが見えます！これはマッハバンドと呼ばれる側方抑制効果です。',science:'網膜の水平細胞による側方抑制（lateral inhibition）がコントラスト境界を強調します。エッジ検出の基本メカニズムです（Ernst Mach,1865）。',
+draw:function(c){var cv=document.createElement('canvas');cv.width=240;cv.height=160;cv.className='w-56';var ctx=cv.getContext('2d');var grad=ctx.createLinearGradient(0,0,240,0);grad.addColorStop(0,'#f0f0f0');grad.addColorStop(0.4,'#f0f0f0');grad.addColorStop(0.6,'#404040');grad.addColorStop(1,'#404040');ctx.fillStyle=grad;ctx.fillRect(0,0,240,160);c.appendChild(cv);}},
+{name:'静止した動き錯視（コーヒーウォール）',question:'水平線は傾いている？',choices:['斜めに傾いている','完全に水平','ジグザグになっている'],correct:1,explain:'水平線は完全に水平です！タイルの色の組み合わせが傾きの錯覚を生みます。',science:'色の境界と明度のコントラストが初期視覚野の方向選択性ニューロンを誤活性化させます（café wall illusion、Gregory & Heard,1979）。',
+draw:function(c){var cv=document.createElement('canvas');cv.width=240;cv.height=200;cv.className='w-56';var ctx=cv.getContext('2d');var sz=30;for(var row=0;row<6;row++){var offset=row%2===0?0:sz/2;for(var col=-1;col<9;col++){ctx.fillStyle=(col+row)%2===0?'white':'#374151';ctx.fillRect(col*sz+offset,row*sz,sz,sz);}ctx.fillStyle='#9ca3af';ctx.fillRect(0,row*sz+sz-2,240,4);}c.appendChild(cv);}},
+{name:'弁当箱錯視（同じ大きさの四角）',question:'2つの長方形は同じ形？',choices:['左が横長','右が縦長','全く同じ形'],correct:2,explain:'実は全く同じ形です！視野内の位置と向きによって形が変わって見えます（文脈効果）。',science:'視覚野の形状処理は絶対的でなく文脈依存的です。傾けて見ると同じ形と判断しやすくなります（Shepard,1990）。',
+draw:function(c){var s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('viewBox','0 0 300 160');s.setAttribute('class','w-72');s.innerHTML='<rect width="300" height="160" fill="#1f2937"/><rect x="30" y="50" width="90" height="60" fill="none" stroke="white" stroke-width="3" rx="2"/><rect x="180" y="50" width="90" height="60" fill="none" stroke="white" stroke-width="3" rx="2"/><text x="75" y="145" fill="#6b7280" font-size="11" text-anchor="middle">A</text><text x="225" y="145" fill="#6b7280" font-size="11" text-anchor="middle">B</text><line x1="150" y1="20" x2="150" y2="140" stroke="#374151" stroke-width="1" stroke-dasharray="4,4"/>';c.appendChild(s);}}
+];
+
+var currentIdx=0,correctCount=0,shuffled=[],answered=false;
+
+function startQuiz(){currentIdx=0;correctCount=0;shuffled=[...illusions].sort(function(){return Math.random()-0.5;});document.getElementById('startScreen').classList.add('hidden');document.getElementById('resultScreen').classList.add('hidden');document.getElementById('quizScreen').classList.remove('hidden');showIllusion();}
+
+function showIllusion(){answered=false;var il=shuffled[currentIdx];document.getElementById('qNum').textContent=currentIdx+1;document.getElementById('correctCount').textContent=correctCount;document.getElementById('progressBar').style.width=(currentIdx/15*100)+'%';document.getElementById('illusion-name').textContent=il.name;document.getElementById('q-text').textContent=il.question;var container=document.getElementById('illusion-container');container.innerHTML='';il.draw(container);var bb=document.getElementById('answer-buttons');bb.innerHTML='';il.choices.forEach(function(ch,i){var btn=document.createElement('button');btn.className='px-4 py-2 rounded-lg border border-gray-600 text-sm hover:border-violet-500 hover:text-violet-300 transition';btn.textContent=ch;btn.addEventListener('click',function(){if(!answered)selectAnswer(i);});bb.appendChild(btn);});document.getElementById('reveal-panel').classList.add('hidden');}
+
+function selectAnswer(idx){answered=true;var il=shuffled[currentIdx];var isCorrect=idx===il.correct;if(isCorrect)correctCount++;var btns=document.getElementById('answer-buttons').querySelectorAll('button');btns.forEach(function(btn,i){if(i===il.correct){btn.className='px-4 py-2 rounded-lg border border-green-500 bg-green-900/30 text-green-300 text-sm';}else if(i===idx&&!isCorrect){btn.className='px-4 py-2 rounded-lg border border-red-500 bg-red-900/30 text-red-300 text-sm';}btn.disabled=true;});document.getElementById('verdict-icon').textContent=isCorrect?'✅':'❌';document.getElementById('verdict-text').textContent=isCorrect?'正解！':'不正解';document.getElementById('verdict-text').className='font-bold '+(isCorrect?'text-green-400':'text-red-400');document.getElementById('reveal-explanation').textContent=il.explain;document.getElementById('science-note').textContent='🧬 神経科学: '+il.science;var nb=document.getElementById('nextBtn');if(currentIdx>=14){nb.textContent='結果を見る';nb.onclick=showResult;}else{nb.textContent='次の錯視 →';nb.onclick=nextIllusion;}document.getElementById('reveal-panel').classList.remove('hidden');document.getElementById('correctCount').textContent=correctCount;}
+
+function nextIllusion(){currentIdx++;showIllusion();}
+
+function showResult(){document.getElementById('quizScreen').classList.add('hidden');document.getElementById('resultScreen').classList.remove('hidden');var pct=correctCount/15;var emoji,title,msg;if(pct>=0.9){emoji='🧠';title='知覚科学マスター！';msg='錯視を「知っている」ことが判断を助けましたね。';}else if(pct>=0.7){emoji='👁️';title='鋭い知覚力！';msg='視覚システムへの深い理解があります。';}else if(pct>=0.5){emoji='🔬';title='科学的思考力あり';msg='脳は意外なところで騙されますね。';}else{emoji='😵';title='錯覚の罠にはまった！';msg='それで正常です。これが人間の視覚の限界です。';}document.getElementById('res-emoji').textContent=emoji;document.getElementById('res-title').textContent=title;document.getElementById('res-score').textContent=correctCount+' / 15';document.getElementById('res-msg').textContent=msg;}
+</script>
+</body>
+</html>
